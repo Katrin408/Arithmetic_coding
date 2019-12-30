@@ -2,7 +2,7 @@ from collections import defaultdict
 from fractions import Fraction
 from bitstring import BitArray
 
-
+#функция построения рабочего отрезка
 def build_prob(input_codes):
     counts = defaultdict(int)
 
@@ -22,7 +22,7 @@ def build_prob(input_codes):
     return output_prob,pr
     
     
-    
+#функция кодирования    
 def encode_fraction_range(input_codes, input_prob):
     left,right = input_prob[input_codes[0]]
 
@@ -39,7 +39,7 @@ def encode_fraction_range(input_codes, input_prob):
 
     return end_fract, width
     
-    
+#функция декодирования    
 def decode_fraction(input_fraction, input_prob):
     output_codes = []
 
