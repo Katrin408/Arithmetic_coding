@@ -1,0 +1,130 @@
+from collections import defaultdict
+from fractions import Fraction
+from bitstring import BitArray
+
+
+def build_prob(input_codes):
+    counts = defaultdict(int)
+
+    for code in input_codes:
+        counts[code] += 1
+    pr = []
+    output_prob = dict()
+    length = len(input_codes)
+    cumulative_count = 0
+
+    for code in sorted(sorted(counts), key=counts.get, reverse=True):
+        pr.append(Fraction(counts[code],length))
+        current_count = counts[code]+cumulative_count
+        prob_pair = Fraction(cumulative_count, length), Fraction(current_count, length)
+        output_prob[code] = prob_pair
+        cumulative_count += counts[code]
+    return output_prob,pr
+    
+    
+    
+def encode_fraction_range(input_codes, input_prob):
+    left,right = input_prob[input_codes[0]]
+
+
+    for code in input_codes[1:]:
+        d_start, d_width = input_prob[code]
+        a = left
+        b = right
+        right = a+(b-a)*d_width
+        left = a+(b-a)*d_start
+
+    end_fract = (Fraction(left)+Fraction(right))/2
+    width = Fraction(right)-Fraction(left)
+
+    return end_fract, width
+    
+    
+def decode_fraction(input_fraction, input_prob):
+    output_codes = []
+
+    while len(output_codes) != len(string):
+        for code, (left, right) in input_prob.items():
+            if left <= input_fraction < right:
+                input_fraction = (input_fraction-left)/(right-left)
+                output_codes.append(code)
+                break
+    return output_codes
+    
+    
+def deci_to_col(width):
+    k = 1
+    while width<1:
+        k+=1
+        width = width*2
+    return k
+    
+    
+def deci_to_bin(end_fract,width):
+    binar = '0.'
+    d = end_fract*2    
+    for i in range(col):
+        if d>1:
+            binar = binar + '1'
+            d = (d-1)*2
+        else:
+            binar = binar + '0'
+            d = d*2
+            #print(binar)
+    return(binar)
+    
+    
+def bin_to_dec(b,len_diff):
+    #t = q.split('.')
+    t = b[len_diff:]
+    dec = 0
+    k = 0
+    #for i in t[1]:
+    for i in t:
+        k += 1
+        v = int(i)
+        dec += v * Fraction(1,2**k)
+    return(dec)
+    
+    
+f = open('test4.txt')
+text = f.read()
+encode_str = text
+print(encode_str)
+
+string = text
+
+if len(string) != 0:
+    prob,pr = build_prob(string)
+    
+    #print('prob:', repr(prob))
+    print('len(prob):', repr(len(prob)))
+
+    end_fract, width = encode_fraction_range(string, prob)
+    print('fraction_range:', end_fract)
+    
+    col = deci_to_col(width)
+    q = deci_to_bin(end_fract,col)
+    #ll = bin_to_dec(q)
+    bit_len = 8
+    bin_x = q[2:]
+    len_diff = bit_len - (len(bin_x)%bit_len)
+    bin_x = ('0'*len_diff) + bin_x
+    with open('chisl', 'wb') as f:
+        for i in range(0,len(bin_x),bit_len):
+            tmp = bin_x[i:i+bit_len]
+            val = int(tmp,2).to_bytes(1, 'big')
+            f.write(val)
+
+
+    a = open('chisl', 'rb') 
+    u = a.read() 
+    w = 123
+    chi = BitArray(bytes = u)
+    f.close()    
+    l = chi.bin
+    ll = bin_to_dec(l,len_diff)
+    decoded_fraction = decode_fraction(ll, prob)
+    print('decoded_fraction:', ''.join(decoded_fraction))
+else:
+    print('Файл пуст')
